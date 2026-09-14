@@ -1,115 +1,37 @@
-I learned that Redis is useful for data that needs fast access or does not necessarily need permanent storage.
+# Chapter 01 — Redis Fundamentals
 
-## Redis vs MongoDB
+This **Chapter 01** repository is focused on learning the fundamentals of Redis through practical, hands-on experiments.
 
-I learned that Redis and MongoDB can work together rather than replacing each other.
+The chapter covers **what Redis is**, how its in-memory data storage works, and why Redis is useful when an application needs fast access to data or temporary data storage.
 
-Redis is useful for fast or temporary data such as session state, counters, caching, and rate-limit information.
+## CLI Practice
 
-MongoDB is better suited for persistent application data such as users, notes, scenario records, and other long-term data.
-
-```text
-Redis    → Fast / temporary data
-MongoDB  → Persistent application data
-
-# Redis Practice Notes
-
-## Key-Value Operations
-
-I practiced storing and retrieving values using:
-
-```
-SET key value
-GET key
-```
-
-I learned that `SET` creates a key or replaces its existing value.
-If a key does not exist, `GET` returns `(nil)`.
-I also learned that Redis does not create duplicate values when the same key is set again; the existing value is replaced.
+I practiced Redis locally using **Memurai** on Windows and worked with Redis through the **Redis CLI**. I learned the basic key-value model and practiced storing, retrieving, updating, and deleting data using commands such as `SET`, `GET`, `EXISTS`, `DEL`, and `TYPE`.
 
 ## TTL
 
-TTL means Time To Live. It determines how long a key should remain available before Redis automatically removes it.
+I also learned how **TTL (Time To Live)** works and how Redis can automatically remove temporary data after a specified amount of time. I tested different ways of setting expiration and observed how operations such as `SET` and `APPEND` affect an existing TTL.
 
-I practiced:
+## Strings & Counters
 
-```
-SET practice-session:test active EX 60
-TTL practice-session:test
-```
+The chapter also covers **Redis Strings** and **counters**. I practiced modifying Strings with `APPEND` and worked with `INCR`, `INCRBY`, `DECR`, and `DECRBY` to understand how Redis can maintain counters. I used these concepts to create practical login and AI request counters and verified their values through the Redis CLI.
 
-I learned:
+## Redis + MongoDB
 
-```
-TTL > 0  → seconds remaining
--1       → key exists without expiration
--2       → key does not exist
-```
-
-I also discovered that performing a normal `SET` on a key removes its previous expiration unless a new expiration is specified.
-
-## Redis Strings
-
-I learned about Redis Strings and practiced storing text:
-
-```
-SET user:42:name Taufeek
-GET user:42:name
-```
-
-I also practiced `APPEND`, which modifies an existing String:
-
-```
-APPEND practice-session:test " - user123"
-```
-
-I verified that modifying the String with `APPEND` did not remove its existing TTL.
-
-## Counters
-
-I practiced Redis counters using:
-
-```
-INCR
-INCRBY
-DECR
-DECRBY
-```
-
-I learned that Redis can increment or decrement numeric values directly.
-I also tested `INCR` on a missing key and learned that Redis effectively starts from `0` and increments it to `1`.
-I created counters for login attempts and AI requests, then verified their values through the Redis CLI.
-
-## Other Commands
-
-I practiced:
-
-```
-EXISTS key
-DEL key
-TYPE key
-```
-
-These helped me check whether keys existed, remove keys, and inspect their data type.
+Another important part of this chapter was understanding how Redis can work alongside MongoDB. I learned that Redis can handle fast or temporary data while MongoDB can continue handling persistent application data.
 
 ## Node.js Integration
 
-I connected Redis to Node.js using the `redis` and `dotenv` packages.
+Finally, I connected Redis with **Node.js** using the `redis` and `dotenv` packages. I learned how to:
 
-I learned that `createClient()` creates the Redis client, while:
+- Create a Redis client
+- Connect to the Redis server
+- Perform Redis operations from Node.js
+- Use environment variables for configuration
+- Close the connection properly
 
-```
-await redisClient.connect();
-```
+## Purpose
 
-establishes the connection.
+The purpose of this chapter was not to cover every Redis feature. Instead, I focused on understanding the core concepts through actual experiments and connecting those concepts to practical backend use cases.
 
-I used environment variables for the Redis URL:
-
-```
-REDIS_URL=redis://localhost:6379
-```
-
-I separated the Redis client configuration into `connection.js` and used it from `basics.js`.
-
-I also learned how Redis CLI commands map to Node.js methods such as `set()`, `get()`, `incr()`, `ttl()`, `del()`, and `exists()`.
+These fundamentals will serve as the foundation for the more advanced Redis concepts I learn and use in future projects.
