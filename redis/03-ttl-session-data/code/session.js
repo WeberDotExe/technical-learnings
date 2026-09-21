@@ -27,16 +27,31 @@ await redisClient.set(sessionkey, JSON.stringify(sessionData),{EX:30});
 
 console.log("\npractise session started");
 
-console.log("Session",JSON.parse(await redisClient.get(sessionkey)));
+// Check session before expiration
+console.log(
+  "\nSession before expiration:",
+  await redisClient.get(sessionkey)
+);
 
-console.log("TTL:",await redisClient.ttl(sessionkey));
+console.log(
+  "Current TTL:",
+  await redisClient.ttl(sessionkey)
+);
 
-//simulate user activity
-console.log("\nuser sent a message");
+// Wait for the session to expire
+console.log("\nWaiting for session to expire...");
 
-//simulate the session ttl
-await redisClient.expire(sessionkey, 30);
+await new Promise((resolve) => setTimeout(resolve, 31000));
 
-console.log("TTL: after activity",await redisClient.ttl(sessionkey));
+// Check session after expiration
+console.log(
+  "\nSession after expiration:",
+  await redisClient.get(sessionkey)
+);
+
+console.log(
+  "TTL after expiration:",
+  await redisClient.ttl(sessionkey)
+);
 
 await redisClient.quit();
