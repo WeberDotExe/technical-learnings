@@ -1,62 +1,56 @@
 import "dotenv/config";
-import {createClient} from 'redis';
+import { createClient } from "redis";
 
 const redisClient = createClient({
-    url:process.env.REDIS_URL
+  url: process.env.REDIS_URL,
 });
 
-redisClient.on("error",(error)=>{
-    console.error("Redis client error",error)
+redisClient.on("error", (error) => {
+  console.error("Redis Client Error:", error);
 });
 
 await redisClient.connect();
 
-console.log("redis client connected");
+console.log("Redis client connected");
 
-// clear stale keys from previous runs so the hash is created consistently
-await redisClient.del("user:42", "usser:42");
+// Create a Hash
+await redisClient.hSet("user:42", {
+  name: "Taufique",
+  role: "developer",
+  loginAttempts: "0",
+  aiRequests: "0",
+});
 
-//created a hash user
+console.log("\nInitial user:", await redisClient.hGetAll("user:42"));
 
-await redisClient.hSet("user:42",{
-    name:"taufeek",
-    role:"developer",
-    status:"active"
-})
+// Update one field
+await redisClient.hSet("user:42", "role", "backend-developer");
 
-console.log("\nHash created successfully\n");
+console.log("\nUpdated role:", await redisClient.hGet("user:42", "role"));
 
-//get individual field 
-const name  = await redisClient.hGet("user:42","name");
-const role = await redisClient.hGet("user:42","role");
+// Increment numeric fields
+await redisClient.hIncrBy("user:42", "loginAttempts", 1);
+await redisClient.hIncrBy("user:42", "loginAttempts", 1);
+await redisClient.hIncrBy("user:42", "aiRequests", 3);
 
-console.log("\nname",name)
-console.log("role",role)
+console.log("\nLogin attempts:", await redisClient.hGet("user:42", "loginAttempts"));
+console.log("AI requests:", await redisClient.hGet("user:42", "aiRequests"));
 
-// get multiple fields
-const userDetails = await redisClient.hmGet("user:42",["name","role","status"]);
-console.log("\nSelected fields",userDetails);
+// Check whether a field exists
+console.log(
+  "\nHas email field:",
+  await redisClient.hExists("user:42", "email")
+);
 
-//get all fields
+// Delete one field
+await redisClient.hDel("user:42", "role");
 
-const user = await redisClient.hGetAll("user:42");
-console.log("\n all fields",user);
+console.log(
+  "Has role field after deletion:",
+  await redisClient.hExists("user:42", "role")
+);
 
-//update a field 
-await redisClient.hSet("user:42","status","inactive");
-
-console.log("\nupdated status",await redisClient.hGet("user:42","status"));
-
-//check field existense
-const hasrole = await redisClient.hExists("user:42","role");
-console.log("\nrole field exists",hasrole);
-
-//delete a field
-await redisClient.hDel("user:42","status");
-console.log("status after deletion",await redisClient.hGet("user:42","status"));
-
-//final hash
-console.log("\nfinal hash",await redisClient.hGetAll("user:42"));
+// Inspect the final Hash
+console.log("\nFinal user:", await redisClient.hGetAll("user:42"));
 
 await redisClient.quit();
-
