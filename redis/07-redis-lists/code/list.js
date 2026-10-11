@@ -1,9 +1,4 @@
-import 'dotenv/config';
-import {createClient}  from 'redis';
-
-const redisClient = createClient({
-    url:process.env.REDIS_URL
-});
+import {redisClient} from './redis.js';
 
 async function runListExamples(){
     const key = "learning:node:tasks";
