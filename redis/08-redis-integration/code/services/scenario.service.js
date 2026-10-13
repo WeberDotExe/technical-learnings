@@ -1,3 +1,6 @@
+import redisClient from "../config/redis.js";
+
+const CACHE_TTL_SECONDS = 60;
 
 const scenarios = [
   {
@@ -20,15 +23,56 @@ const scenarios = [
   },
 ];
 
+async function getCachedData(key) {
+    const cachedData = await redisClient.get(key);
+
+    if(cachedData){
+        console.log(`cache hit ${key}`);
+        return JSON.parse(cachedData);
+    }
+    console.log(`cached miss:${key}`);
+    return null;
+}
+
+async function setCachedData(key,data){
+    await redisClient.set(key,JSON.stringify(data),{
+        EX: CACHE_TTL_SECONDS
+    });
+} 
+
 export async function getAllScenarios() {
-  // Simulate fetching data from a database.
+    const cachedKey = "scenarios:all";
+
+    const cachedData = await getCachedData(cachedKey)
+
+    if(cachedData !== null){
+        return cachedData;
+    }
+
   console.log("Fetching scenarios from simulated database...");
 
-  return scenarios;
+    const data = scenarios;
+
+    await setCachedData(cachedKey,data);
+  return data;
 }
 
 export async function getScenarioById(id) {
+    const cachedKey = `scenario:${id}`;
+    const cachedData = await getCachedData(cachedKey);
+
+    if(cachedData !== null){
+        return cachedData;
+    }
+
   console.log(`Fetching scenario ${id} from simulated database...`);
 
-  return scenarios.find((scenario) => scenario.id === id) ?? null;
+  const scenario = scenarios.find((item)=>item.id === id) ?? null;
+
+    if(scenario === null){
+        return null;
+    }
+
+  await setCachedData(cachedKey,scenario);
+    return scenario;
 }
