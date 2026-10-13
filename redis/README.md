@@ -7,11 +7,6 @@
   />
 </p>
 
-<h1 align="center">Redis Learning</h1>
-
-<p align="center">
-  A hands-on journey from Redis fundamentals to backend integration.
-</p>
 
 
 
