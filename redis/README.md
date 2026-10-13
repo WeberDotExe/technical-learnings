@@ -11,7 +11,7 @@
 
 
 
-# Redis Learning
+
 
 A hands-on journey into Redis, from the fundamentals to using it in a Node.js and Express application.
 
