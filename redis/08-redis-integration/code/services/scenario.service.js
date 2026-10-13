@@ -23,22 +23,24 @@ const scenarios = [
   },
 ];
 
-async function getCachedData(key) {
-    const cachedData = await redisClient.get(key);
 
-    if(cachedData){
-        console.log(`cache hit ${key}`);
-        return JSON.parse(cachedData);
-    }
-    console.log(`cached miss:${key}`);
+async function getCachedData(key) {
+  const cachedData = await redisClient.get(key);
+
+  if (cachedData === null) {
+    console.log(`CACHE MISS: ${key}`);
     return null;
+  }
+
+  console.log(`CACHE HIT: ${key}`);
+  return JSON.parse(cachedData);
 }
 
-async function setCachedData(key,data){
-    await redisClient.set(key,JSON.stringify(data),{
-        EX: CACHE_TTL_SECONDS
-    });
-} 
+async function setCachedData(key, data) {
+  await redisClient.set(key, JSON.stringify(data), {
+    EX: CACHE_TTL_SECONDS,
+  });
+}
 
 export async function getAllScenarios() {
     const cachedKey = "scenarios:all";
