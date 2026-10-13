@@ -1,8 +1,42 @@
+
+<p align="center">
+  <img
+    src="./assets/redis-banner.png"
+    alt="Abstract Redis data network in a dark violet theme"
+    width="100%"
+  />
+</p>
+
+<h1 align="center">Redis Learning</h1>
+
+<p align="center">
+  A hands-on journey from Redis fundamentals to backend integration.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Redis-Learning-9B6DFF?style=flat-square" alt="Redis Learning" />
+  <img src="https://img.shields.io/badge/Node.js-Backend-21162F?style=flat-square" alt="Node.js Backend" />
+  <img src="https://img.shields.io/badge/Platform-Windows-101014?style=flat-square" alt="Windows" />
+</p>
+
+
 # Redis Learning
 
 A hands-on journey into Redis, from the fundamentals to using it in a Node.js and Express application.
 
 This folder contains the notes, commands, code examples, and experiments I worked through while learning Redis. Each chapter focuses on a specific concept and helps me understand how Redis works in practice.
+
+
+<h2 align="center">Learning Roadmap</h2>
+
+<p align="center">
+  <img
+    src="./assets/redisthree.png"
+    alt="Roadmap of eight Redis learning chapters"
+    width="100%"
+  />
+</p>
+
 
 ## Learning Roadmap
 
@@ -30,6 +64,22 @@ This folder contains the notes, commands, code examples, and experiments I worke
 The learning process includes testing Redis commands directly, observing key expiration, working with different data structures, and integrating Redis into an Express API.
 
 In the integration chapter, I built a small scenario API and implemented **cache-aside caching** with a 60-second TTL. The API checks Redis for cached data before using the original data source, helping demonstrate cache hits, cache misses, and expiration.
+
+
+<h2 align="center">Redis Cache-Aside Flow</h2>
+
+<p align="center">
+  <img
+    src="./assets/cache-aside-flow.png"
+    alt="Cache-aside flow showing an Express API checking Redis before using the scenario data source"
+    width="100%"
+  />
+</p>
+
+The API checks Redis first. On a cache miss, it retrieves
+the data from the source, stores the result in Redis with a
+60-second TTL, and returns the response.
+
 
 ## Running the Examples
 
