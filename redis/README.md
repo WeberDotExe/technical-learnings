@@ -1,7 +1,7 @@
 
 <p align="center">
   <img
-    src="./assets/redis-banner.png"
+    src="./assets/redisbanner.png"
     alt="Abstract Redis data network in a dark violet theme"
     width="100%"
   />
@@ -70,7 +70,7 @@ In the integration chapter, I built a small scenario API and implemented **cache
 
 <p align="center">
   <img
-    src="./assets/cache-aside-flow.png"
+    src="./assets/rediscache.png"
     alt="Cache-aside flow showing an Express API checking Redis before using the scenario data source"
     width="100%"
   />
