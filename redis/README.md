@@ -1,26 +1,17 @@
 
 <p align="center">
   <img
-    src="./assets/redis-banner.png"
+    src="./assets/redisbanner.png"
     alt="Abstract Redis data network in a dark violet theme"
     width="100%"
   />
 </p>
 
-<h1 align="center">Redis Learning</h1>
-
-<p align="center">
-  A hands-on journey from Redis fundamentals to backend integration.
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Redis-Learning-9B6DFF?style=flat-square" alt="Redis Learning" />
-  <img src="https://img.shields.io/badge/Node.js-Backend-21162F?style=flat-square" alt="Node.js Backend" />
-  <img src="https://img.shields.io/badge/Platform-Windows-101014?style=flat-square" alt="Windows" />
-</p>
 
 
-# Redis Learning
+
+
+
 
 A hands-on journey into Redis, from the fundamentals to using it in a Node.js and Express application.
 
@@ -70,7 +61,7 @@ In the integration chapter, I built a small scenario API and implemented **cache
 
 <p align="center">
   <img
-    src="./assets/cache-aside-flow.png"
+    src="./assets/rediscache.png"
     alt="Cache-aside flow showing an Express API checking Redis before using the scenario data source"
     width="100%"
   />
