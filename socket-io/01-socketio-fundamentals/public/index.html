@@ -11,25 +11,36 @@
     <p id="status">Connecting...</p>
     <p id="socket-id">socket:id not connected</p>
 
+    <button id="send-button" disabled>Send Hello event</button>
+    <p id="result">no event sent yet</p>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
 
         const status = document.getElementById('status');
         const socketId = document.getElementById('socket-id');
+        const sendButton = document.getElementById('send-button');
+        const result = document.getElementById('result');
 
         socket.on('connect',()=>{
             status.textContent = 'Connected to socket io server';
             socketId.textContent = `socket:id ${socket.id}`;
-
-            console.log("connected", socket.id);
+            sendButton.disabled = false;
         });
 
         socket.on("disconnect",(reason)=>{
             status.textContent = `Disconnected ${reason}`;
             socketId.textContent = `socket:id not connected`;
+            sendButton.disabled = true;
+        })
 
-            console.log("disconnected", reason);
+        sendButton.addEventListener("click",()=>{
+            socket.emit("hello",{
+                message:"Hello from browser",
+                sentAt: new Date().toISOString()
+            })
+            result.textContent = "Hello event sent to server";
         })
     </script>>
 </body>

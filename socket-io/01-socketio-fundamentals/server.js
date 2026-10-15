@@ -18,6 +18,12 @@ app.use(express.static(path.join(__dirname,'public')));
 io.on("connection",(socket)=>{
     console.log("a client is connected",socket.id);
 
+    socket.on("hello",(data)=>{
+        console.log("hello event recieved");
+        console.log("from socket",socket.id);
+        console.log("payload",data);
+    })
+
     socket.on("disconnect",(reason)=>{
         console.log("a client disconnected",socket.id,reason);
     });
