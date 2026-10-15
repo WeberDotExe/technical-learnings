@@ -1,15 +1,19 @@
 import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const app = express();
 const httpServer = createServer(app);
-
 const io = new Server(httpServer)
 
-app.get('/',(req,res)=>{
-    res.send("socket.io server is running!")
-})
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname,'public')));
+
+
 
 io.on("connection",(socket)=>{
     console.log("a client is connected",socket.id);

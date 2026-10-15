@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>socket io connection test</title>
+</head>
+<body>
+    <h1>Socket.io connection test</h1>
+
+    <p id="status">Connecting...</p>
+    <p id="socket-id">socket:id not connected</p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const status = document.getElementById('status');
+        const socketId = document.getElementById('socket-id');
+
+        socket.on('connect',()=>{
+            status.textContent = 'Connected to socket io server';
+            socketId.textContent = `socket:id ${socket.id}`;
+
+            console.log("connected", socket.id);
+        });
+
+        socket.on("disconnect",(reason)=>{
+            status.textContent = `Disconnected ${reason}`;
+            socketId.textContent = `socket:id not connected`;
+
+            console.log("disconnected", reason);
+        })
+    </script>>
+</body>
+</html>
