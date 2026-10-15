@@ -22,6 +22,21 @@ io.on("connection",(socket)=>{
         console.log("hello event recieved");
         console.log("from socket",socket.id);
         console.log("payload",data);
+
+        socket.emit("hello response",{
+            message:"hello from server!",
+            recievedMessage:data.message
+        })
+    })
+
+    socket.on("broadcast-message",(data)=>{
+        console.log("broadcast requested by :",socket.id);
+        console.log("message:",data.message);
+
+        socket.broadcast.emit("broadcast-message",{
+            message:data.message,
+            senderId:socket.id
+        })
     })
 
     socket.on("disconnect",(reason)=>{
