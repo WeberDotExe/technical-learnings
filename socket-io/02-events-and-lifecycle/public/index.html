@@ -10,13 +10,16 @@
 
     <p id="status">Connecting...</p>
     <p id="socket-id">Socket ID: Not connected</p>
-    <p id="transport">Transport: unknown</p>
 
-    <button id="disconnect-button" disabled>Disconnect</button>
-    <button id="connect-button" disabled>Connect</button>
+   <hr />
 
-    <h2>connection logs</h2>
-    <ul id="logs"></ul>
+   <label for="answer">Your answer</label>
+    <input id="answer" type="text" placeholder="type a test answer" />
+
+    <button id="send-button" disabled>Send Answer</button>
+
+    <h2>result</h2>
+    <p id="result">waiting for you to send an answer</p>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -24,61 +27,40 @@
 
         const status = document.getElementById('status');
         const socketId = document.getElementById('socket-id');
-        const transport = document.getElementById('transport');
-        const disconnectButton = document.getElementById('disconnect-button');
-        const connectButton = document.getElementById('connect-button');
-        const logs = document.getElementById('logs');
-        
-        function addLog(message){
-            const item = document.createElement('li');
-            item.textContent = `${new Date().toLocaleTimeString} - ${message}`;
-            logs.prepend(item);
-        }
+        const answerInput = document.getElementById("answer");
+        const sendButton = document.getElementById("send-button");
+        const result = document.getElementById("result")
+       
 
         socket.on("connect",()=>{
             status.textContent = "connected";
             socketId.textContent = `Socket ID: ${socket.id}`;
-            transport.textContent = `Transport: ${socket.io.engine.transport.name}`;
-
-            disconnectButton.disabled = false;
-            connectButton.disabled = true;
-
-            addLog(`connected with socket id ${socket.id}`);
+           sendButton.disabled = false;
         })
 
         socket.on("disconnect",(reason)=>{
             status.textContent = `disconnected ${reason}`;
             socketId.textContent = "Socket ID: Not connected";
-            transport.textContent = "Transport: unknown";
-
-            disconnectButton.disabled = true;
-            connectButton.disabled = false;
-
-            addLog(`disconnected due to ${reason}`);
+            sendButton.disabled = true;
         })
 
-        socket.io.on("reconnect_attempt",(attempt)=>{
-            addLog(`Reconnection attempt:${attempt}`)
-        })
+        sendButton.addEventListener("click",()=>{
+            const answer = answerInput.value.trim();
 
-        socket.io.on("reconnect",(attempt)=>{
-            addLog(`Reconnected after attempt:${attempt}`)
-        })
+            if(!answer){
+                result.textContent = "please enter an answer first";
+                return
+            }
 
-        socket.on("connect_error",(error)=>{
-            addLog(`Connection error: ${error.message}`);
-        })
+            result.textContent = "Sending an answer and waiting for acknowledgement...";
+            sendButton.disabled = true;
 
-        disconnectButton.addEventListener("click",()=>{
-            socket.disconnect();
-            addLog("manual disconnect request")
-        })
+            socket.emit("save-answer",{answer},(response)=>{
+                result.textContent= `Success ${response.success} |`+ `Server ${response.message} |`+`recieved answer ${response.recievedAnswer}`;
+                sendButton.disabled = false
+            });
 
-        connectButton.addEventListener("click",()=>{
-            socket.connect();
-            addLog("manual connect request")
-        })
-
+        });
 
 
     </script>

@@ -23,6 +23,19 @@ io.on("connection",(socket)=>{
         console.log("transport upgraded to :",transport.name);
     });
 
+    socket.on('save-answer',(data,acknowledge)=>{
+        console.log("answer recieved:",data.answer);
+        console.log("from socket:",socket.id);
+
+        if(typeof acknowledge === "function"){
+            acknowledge({
+                success:true,
+                message:"answer recieved by the server",
+                recievedAnswer:data.answer,
+            });
+        }
+    });
+
     socket.on("disconnect",(reason)=>{
         console.log("client disconnected")
         console.log("Socket ID:",socket.id);
