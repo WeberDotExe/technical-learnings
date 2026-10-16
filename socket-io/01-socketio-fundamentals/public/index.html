@@ -15,8 +15,24 @@
 
     <h2>Direct server response</h2>
     
-    <button id="send-button" disabled>Send Hello event</button>
-    <p id="result">no event sent yet</p>
+    <button id="hello-button" disabled>Send Hello event</button>
+    <p id="hello-result">no event sent yet</p>
+
+     <hr />   
+
+    <h2>Direct server response</h2>
+    <button id="hello-button" disabled>send hello event</button>
+    <p id="hello-result">no event sent yet</p>
+
+    <hr />
+
+    <h2>Broadcast to other clients</h2>
+    <button id="broadcast-button" disabled>Broadcast Message</button>
+
+    <p id="broadcast-status">no broadcast sent yet</p>
+
+    <h2>recieved Broadcast</h2>
+    <ul id="broadcast-list"></ul>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -24,32 +40,53 @@
 
         const status = document.getElementById('status');
         const socketId = document.getElementById('socket-id');
-        const sendButton = document.getElementById('send-button');
-        const result = document.getElementById('result');
-
+        const helloButton = document.getElementById('hello-button');
+        const helloResult = document.getElementById('hello-result');
+        const broadcastButton = document.getElementById('broadcast-button');
+        const broadcastStatus = document.getElementById('broadcast-status');
+        const broadcastList = document.getElementById('broadcast-list');
+       
         socket.on('connect',()=>{
             status.textContent = 'Connected to socket io server';
             socketId.textContent = `socket:id ${socket.id}`;
-            sendButton.disabled = false;
+            helloButton.disabled = false;
+            broadcastButton.disabled = false;
+            console.log(`Connected to socket io server with id ${socket.id}`);
         });
 
         socket.on("disconnect",(reason)=>{
             status.textContent = `Disconnected ${reason}`;
             socketId.textContent = `socket:id not connected`;
-            sendButton.disabled = true;
+            helloButton.disabled = true;
+            broadcastButton.disabled = true;
+            console.log(`Disconnected from socket io server with reason ${reason}`);
+        })
+
+        helloButton.addEventListener("click",()=>{
+            socket.emit("hello",{
+                message:"Hello from browser",
+                sentAt: new Date().toISOString()
+            })
+            helloResult.textContent = "Hello event sent to server";
         })
 
         socket.on("hello response",(data)=>{
             result.textContent = `server replied :${data.message} | Your message: ${data.recievedMessage}`;
         })
 
-        sendButton.addEventListener("click",()=>{
-            socket.emit("hello",{
-                message:"Hello from browser",
-                sentAt: new Date().toISOString()
-            })
-            result.textContent = "Hello event sent to server";
-        })
+       broadcastButton.addEventListener("click",()=>{
+        socket.emit("broadcast-message",{
+            message:"a broadcast was sent"
+        });
+
+        broadcastStatus.textContent = "Broadcast message sent to server";
+       })
+
+       socket.on("broadcast-message",(data)=>{
+        const item = document.createElement("li");
+        item.textContent = `${data.message} | Sent at: ${data.senderId}`;
+        broadcastList.appendChild(item);
+       })
     </script>>
 </body>
 </html>
