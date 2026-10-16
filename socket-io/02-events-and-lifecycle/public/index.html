@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>socketio lifecycle test</title>
+</head>
+<body>
+    <h1>Socket.io Connection lifecycle</h1>
+
+    <p id="status">Connecting...</p>
+    <p id="socket-id">Socket ID: Not connected</p>
+    <p id="transport">Transport: unknown</p>
+
+    <button id="disconnect-button" disabled>Disconnect</button>
+    <button id="connect-button" disabled>Connect</button>
+
+    <h2>connection logs</h2>
+    <ul id="logs"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const status = document.getElementById('status');
+        const socketId = document.getElementById('socket-id');
+        const transport = document.getElementById('transport');
+        const disconnectButton = document.getElementById('disconnect-button');
+        const connectButton = document.getElementById('connect-button');
+        const logs = document.getElementById('logs');
+        
+        function addLog(message){
+            const item = document.createElement('li');
+            item.textContent = `${new Date().toLocaleTimeString} - ${message}`;
+            logs.prepend(item);
+        }
+
+        socket.on("connect",()=>{
+            status.textContent = "connected";
+            socketId.textContent = `Socket ID: ${socket.id}`;
+            transport.textContent = `Transport: ${socket.io.engine.transport.name}`;
+
+            disconnectButton.disabled = false;
+            connectButton.disabled = true;
+
+            addLog(`connected with socket id ${socket.id}`);
+        })
+
+        socket.on("disconnect",(reason)=>{
+            status.textContent = `disconnected ${reason}`;
+            socketId.textContent = "Socket ID: Not connected";
+            transport.textContent = "Transport: unknown";
+
+            disconnectButton.disabled = true;
+            connectButton.disabled = false;
+
+            addLog(`disconnected due to ${reason}`);
+        })
+
+        socket.io.on("reconnect_attempt",(attempt)=>{
+            addLog(`Reconnection attempt:${attempt}`)
+        })
+
+        socket.io.on("reconnect",(attempt)=>{
+            addLog(`Reconnected after attempt:${attempt}`)
+        })
+
+        socket.on("connect_error",(error)=>{
+            addLog(`Connection error: ${error.message}`);
+        })
+
+        disconnectButton.addEventListener("click",()=>{
+            socket.disconnect();
+            addLog("manual disconnect request")
+        })
+
+        connectButton.addEventListener("click",()=>{
+            socket.connect();
+            addLog("manual connect request")
+        })
+
+
+
+    </script>
+</body>
+</html>
