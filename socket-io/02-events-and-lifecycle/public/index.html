@@ -44,23 +44,29 @@
             sendButton.disabled = true;
         })
 
-        sendButton.addEventListener("click",()=>{
-            const answer = answerInput.value.trim();
+       sendButton.addEventListener("click",()=>{
+        const answer = answerInput.value.trim()
 
-            if(!answer){
-                result.textContent = "please enter an answer first";
+        if(!answer){
+            result.textContent = "please enter an answer first"
+            return;
+        }
+        result.textContent = "waiting for server acknowledgement..."
+        sendButton.disabled = true;
+
+        socket.timeout(3000).emit("save-answer",{answer},(error,response)=>{
+            sendButton.disabled = false;
+
+            if(error){
+                result.textContent = "the server did not acknowledge the event within three seconds";
                 return
             }
 
-            result.textContent = "Sending an answer and waiting for acknowledgement...";
-            sendButton.disabled = true;
+            result.textContent = `Success:${response.success} |` + `Server:${response.message} |`+`recieved answer ${response.recievedAnswer}`
 
-            socket.emit("save-answer",{answer},(response)=>{
-                result.textContent= `Success ${response.success} |`+ `Server ${response.message} |`+`recieved answer ${response.recievedAnswer}`;
-                sendButton.disabled = false
-            });
+        })
 
-        });
+       })
 
 
     </script>
