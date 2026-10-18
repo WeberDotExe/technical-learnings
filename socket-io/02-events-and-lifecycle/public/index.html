@@ -50,7 +50,7 @@
 
         socket.on("connect_error",(error)=>{
             console.log("connection error",error.message);
-            status.textContent = "connection failed retrying 😊😊😊😊"
+            status.textContent = "connection failed retrying...."
         })
 
         reconnectButton.addEventListener("click",()=>{
