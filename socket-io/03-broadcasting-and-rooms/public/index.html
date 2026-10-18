@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Socket.IO Broadcasting</title>
+</head>
+<body>
+  <h1>Socket.IO Broadcasting</h1>
+
+  <p id="status">Connecting...</p>
+  <p id="socket-id">Socket ID: Not connected</p>
+
+  <hr />
+
+  <label for="message">Message:</label>
+  <input id="message" type="text" placeholder="Type a message" />
+
+  <button id="all-button" disabled>Send to Everyone</button>
+  <button id="others-button" disabled>Send to Others</button>
+
+  <h2>Received Messages</h2>
+  <ul id="messages"></ul>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const status = document.getElementById("status");
+    const socketId = document.getElementById("socket-id");
+    const messageInput = document.getElementById("message");
+    const allButton = document.getElementById("all-button");
+    const othersButton = document.getElementById("others-button");
+    const messages = document.getElementById("messages");
+
+    socket.on("connect", () => {
+      status.textContent = "Connected";
+      socketId.textContent = `Socket ID: ${socket.id}`;
+
+      allButton.disabled = false;
+      othersButton.disabled = false;
+    });
+
+    socket.on("disconnect", (reason) => {
+      status.textContent = `Disconnected: ${reason}`;
+      socketId.textContent = "Socket ID: Not connected";
+
+      allButton.disabled = true;
+      othersButton.disabled = true;
+    });
+
+    function sendMessage(eventName) {
+      const message = messageInput.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      socket.emit(eventName, message);
+      messageInput.value = "";
+    }
+
+    allButton.addEventListener("click", () => {
+      sendMessage("message-to-all");
+    });
+
+    othersButton.addEventListener("click", () => {
+      sendMessage("message-to-others");
+    });
+
+    socket.on("new-message", (data) => {
+      const item = document.createElement("li");
+
+      const scope =
+        data.type === "all" ? "Everyone" : "Other clients";
+
+      const sender =
+        data.senderId === socket.id ? "You" : data.senderId;
+
+      item.textContent =
+        `[${scope}] ${sender}: ${data.message}`;
+
+      messages.appendChild(item);
+    });
+  </script>
+</body>
+</html>
