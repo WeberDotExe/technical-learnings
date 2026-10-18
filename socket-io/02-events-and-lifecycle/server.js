@@ -27,10 +27,6 @@ io.on("connection",(socket)=>{
         console.log("answer recieved:",data.answer);
         console.log("from socket:",socket.id);
 
-        if(data.answer === "timeout-test"){
-            console.log("skipping acknowledgement for test ")
-            return;
-        }
 
         if(typeof acknowledge === "function"){
             acknowledge({

@@ -9,6 +9,7 @@
     <h1>Socket.io Connection lifecycle</h1>
 
     <p id="status">Connecting...</p>
+    <button id="reconnect-button">Reconnect</button>
     <p id="socket-id">Socket ID: Not connected</p>
 
    <hr />
@@ -23,13 +24,16 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
+        const socket = io({
+            reconnection:false
+        });
 
         const status = document.getElementById('status');
         const socketId = document.getElementById('socket-id');
         const answerInput = document.getElementById("answer");
         const sendButton = document.getElementById("send-button");
         const result = document.getElementById("result")
+        const reconnectButton = document.getElementById('reconnect-button')
        
 
         socket.on("connect",()=>{
@@ -42,6 +46,21 @@
             status.textContent = `disconnected ${reason}`;
             socketId.textContent = "Socket ID: Not connected";
             sendButton.disabled = true;
+        })
+
+        socket.on("connect_error",(error)=>{
+            console.log("connection error",error.message);
+            status.textContent = "connection failed retrying 😊😊😊😊"
+        })
+
+        reconnectButton.addEventListener("click",()=>{
+            if(socket.connected){
+                status.textContent = "already connected"
+                return;
+            }
+
+            status.textContent = "manually attempt to reconnect...";
+            socket.connect();
         })
 
        sendButton.addEventListener("click",()=>{
@@ -65,9 +84,7 @@
             result.textContent = `Success:${response.success} |` + `Server:${response.message} |`+`recieved answer ${response.recievedAnswer}`
 
         })
-
        })
-
 
     </script>
 </body>
