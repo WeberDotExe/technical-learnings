@@ -4,23 +4,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Socket.IO Broadcasting</title>
+  <title>Socket.IO Rooms</title>
 </head>
 <body>
-  <h1>Socket.IO Broadcasting</h1>
+  <h1>Socket.IO Rooms</h1>
 
   <p id="status">Connecting...</p>
   <p id="socket-id">Socket ID: Not connected</p>
+  <p id="room-status">Room: None</p>
+
+  <hr />
+
+  <label for="room">Room name:</label>
+  <input id="room" type="text" placeholder="e.g. interview-101" />
+  <button id="join-button" disabled>Join Room</button>
+  <button id="leave-button" disabled>Leave Room</button>
 
   <hr />
 
   <label for="message">Message:</label>
-  <input id="message" type="text" placeholder="Type a message" />
+  <input id="message" type="text" placeholder="Type a room message" />
+  <button id="send-button" disabled>Send to Room</button>
 
-  <button id="all-button" disabled>Send to Everyone</button>
-  <button id="others-button" disabled>Send to Others</button>
-
-  <h2>Received Messages</h2>
+  <h2>Messages</h2>
   <ul id="messages"></ul>
 
   <script src="/socket.io/socket.io.js"></script>
@@ -29,59 +35,96 @@
 
     const status = document.getElementById("status");
     const socketId = document.getElementById("socket-id");
+    const roomStatus = document.getElementById("room-status");
+    const roomInput = document.getElementById("room");
     const messageInput = document.getElementById("message");
-    const allButton = document.getElementById("all-button");
-    const othersButton = document.getElementById("others-button");
+    const joinButton = document.getElementById("join-button");
+    const leaveButton = document.getElementById("leave-button");
+    const sendButton = document.getElementById("send-button");
     const messages = document.getElementById("messages");
+
+    let currentRoom = "";
 
     socket.on("connect", () => {
       status.textContent = "Connected";
       socketId.textContent = `Socket ID: ${socket.id}`;
-
-      allButton.disabled = false;
-      othersButton.disabled = false;
+      joinButton.disabled = false;
     });
 
     socket.on("disconnect", (reason) => {
       status.textContent = `Disconnected: ${reason}`;
       socketId.textContent = "Socket ID: Not connected";
+      roomStatus.textContent = "Room: None";
 
-      allButton.disabled = true;
-      othersButton.disabled = true;
+      currentRoom = "";
+      joinButton.disabled = true;
+      leaveButton.disabled = true;
+      sendButton.disabled = true;
     });
 
-    function sendMessage(eventName) {
-      const message = messageInput.value.trim();
+    joinButton.addEventListener("click", () => {
+      const room = roomInput.value.trim();
 
-      if (!message) {
+      if (!room) {
+        roomStatus.textContent = "Enter a room name first.";
         return;
       }
 
-      socket.emit(eventName, message);
+      socket.emit("join-room", room);
+    });
+
+    socket.on("room-joined", (room) => {
+      currentRoom = room;
+      roomInput.value = room;
+      roomStatus.textContent = `Room: ${room}`;
+
+      leaveButton.disabled = false;
+      sendButton.disabled = false;
+    });
+
+    leaveButton.addEventListener("click", () => {
+      if (currentRoom) {
+        socket.emit("leave-room", currentRoom);
+      }
+    });
+
+    socket.on("room-left", (room) => {
+      currentRoom = "";
+      roomStatus.textContent = `Left room: ${room}`;
+
+      leaveButton.disabled = true;
+      sendButton.disabled = true;
+    });
+
+    sendButton.addEventListener("click", () => {
+      const message = messageInput.value.trim();
+
+      if (!currentRoom || !message) {
+        return;
+      }
+
+      socket.emit("room-message", {
+        room: currentRoom,
+        message,
+      });
+
       messageInput.value = "";
-    }
-
-    allButton.addEventListener("click", () => {
-      sendMessage("message-to-all");
     });
 
-    othersButton.addEventListener("click", () => {
-      sendMessage("message-to-others");
-    });
-
-    socket.on("new-message", (data) => {
+    socket.on("room-message-received", (data) => {
       const item = document.createElement("li");
-
-      const scope =
-        data.type === "all" ? "Everyone" : "Other clients";
 
       const sender =
         data.senderId === socket.id ? "You" : data.senderId;
 
       item.textContent =
-        `[${scope}] ${sender}: ${data.message}`;
+        `[${data.room}] ${sender}: ${data.message}`;
 
       messages.appendChild(item);
+    });
+
+    socket.on("room-error", (message) => {
+      roomStatus.textContent = `Error: ${message}`;
     });
   </script>
 </body>
