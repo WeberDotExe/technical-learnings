@@ -17,7 +17,21 @@ const io = new Server(httpServer, {
 })
 
 io.on("connection",(socket)=>{
+    
     console.log("client connected",socket.id);
+
+    socket.on("send-message",(data)=>{
+        console.log("received message",data);
+
+        io.emit("receive-message",{
+            id:Date.now(),
+            message:data.message,
+            senderId:socket.id,
+            timestamp:new Date().toISOString()
+
+        });
+
+    });
 
     socket.on("disconnect",(reason)=>{
         console.log("client disconnected",socket.id);
