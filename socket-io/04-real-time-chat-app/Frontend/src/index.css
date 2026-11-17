@@ -1,4 +1,16 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  font-family: "Inter", sans-serif;
+  color: #f4f1ff;
+  background: #09090f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,9 +18,13 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background: #111827;
-  color: #f9fafb;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(124, 58, 237, 0.13), transparent 35%),
+    radial-gradient(ellipse at 85% 90%, rgba(91, 33, 182, 0.10), transparent 35%),
+    #09090f;
+  color: #f4f1ff;
 }
 
 button,
@@ -22,5 +38,5 @@ button {
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
 }

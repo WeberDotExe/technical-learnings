@@ -1,17 +1,25 @@
 
-const MessageInput = ({ message, setMessage, onSubmit, disabled }) => {
+const MessageInput = ({
+  message,
+  setMessage,
+  onSend,
+  disabled,
+}) => {
   return (
-    <form className="message-input-form" onSubmit={onSubmit}>
+    <form className="message-input-form" onSubmit={onSend}>
       <input
         type="text"
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={(event) => setMessage(event.target.value)}
         placeholder="Type your message..."
         maxLength={500}
         disabled={disabled}
       />
 
-      <button type="submit" disabled={disabled || !message.trim()}>
+      <button
+        type="submit"
+        disabled={disabled || !message.trim()}
+      >
         Send
       </button>
     </form>

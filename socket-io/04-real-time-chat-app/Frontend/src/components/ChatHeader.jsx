@@ -1,5 +1,5 @@
 
-const ChatHeader = ({ username, isConnected,activeRoom }) => {
+const ChatHeader = ({ username, isConnected, activeRoom }) => {
   return (
     <header className="chat-header">
       <div>
@@ -8,13 +8,16 @@ const ChatHeader = ({ username, isConnected,activeRoom }) => {
 
         {activeRoom && (
           <span className="header-room">
-            Room:{activeRoom}
+            Room: {activeRoom}
           </span>
         )}
       </div>
 
-
-      <span className={`connection-status ${isConnected ? "connected" : "disconnected"}`}>
+      <span
+        className={`connection-status ${
+          isConnected ? "connected" : "disconnected"
+        }`}
+      >
         {isConnected ? "Connected" : "Disconnected"}
       </span>
     </header>

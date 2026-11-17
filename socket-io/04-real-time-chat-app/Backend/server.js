@@ -1,149 +1,178 @@
-import express from 'express';
-import {createServer} from 'node:http';
-import {Server} from 'socket.io';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import crypto from 'crypto';
+
+import express from "express";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
+import cors from "cors";
+import dotenv from "dotenv";
+import crypto from "node:crypto";
 
 dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
 
-app.use(cors({origin: process.env.CLIENT_URL}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+  })
+);
+
 app.use(express.json());
 
 const io = new Server(httpServer, {
-    cors:{origin: process.env.CLIENT_URL}
-})
+  cors: {
+    origin: process.env.CLIENT_URL,
+  },
+});
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-app.get('/',(req,res)=>{
-  res.send("chat server is running")
-})
+app.get("/", (req, res) => {
+  res.send("Chat server is running!");
+});
 
-io.on("connection",(socket)=>{
-  console.log("client connected",socket.id);
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
 
-  socket.on("join-chat",(username)=>{
-    if(typeof username !== "string"){
-      socket.emit("chat-error","invalid username")
+  // Join the chat with a username
+  socket.on("join-chat", (username) => {
+    if (typeof username !== "string") {
+      socket.emit("chat-error", "Invalid username.");
       return;
     }
 
     const cleanUsername = username.trim();
 
-    if(!cleanUsername || cleanUsername.length > 20){
-      socket.emit("chat-error","username must be between 1 and 20 characters")
+    if (!cleanUsername || cleanUsername.length > 20) {
+      socket.emit("chat-error", "Username must be between 1 and 20 characters.");
       return;
     }
 
     socket.data.username = cleanUsername;
 
-    socket.emit("chat-joined",{
-      username:cleanUsername,
-      socketId:socket.id
+    socket.emit("chat-joined", {
+      username: cleanUsername,
+      socketId: socket.id,
     });
-    console.log(`${cleanUsername} joined the chat with socket id ${socket.id}`);
+
+    console.log(`${cleanUsername} joined the chat.`);
   });
 
-  socket.on("join-room",async(roomName)=>{
-    if(!socket.data.username){
-      socket.emit("chat-error","join the chat before joining the room")
+  // Join a room
+  socket.on("join-room", async (roomName) => {
+    if (!socket.data.username) {
+      socket.emit("chat-error", "Join the chat before joining a room.");
       return;
     }
 
-    if(typeof roomName !== "string"){
-      socket.emit("chat-error",'invalid room name')
+    if (typeof roomName !== "string") {
+      socket.emit("chat-error", "Invalid room name.");
       return;
     }
 
     const cleanRoom = roomName.trim();
 
-    if(!/^[a-zA-Z0-9_-]{2,30}$/.test(cleanRoom)){
-      socket.emit('chat-error','room name must be 2-30 characters long and can only contain letters, numbers, underscores, and hyphens')
+    if (
+      !/^[a-zA-Z0-9_-]{2,30}$/.test(cleanRoom)
+    ) {
+      socket.emit(
+        "chat-error",
+        "Room name must be 2–30 characters and contain only letters, numbers, hyphens, or underscores."
+      );
       return;
     }
 
-    if(socket.data.room === cleanRoom){
-      socket.emit("room-joined",cleanRoom);
+    // Avoid joining the same room again
+    if (socket.data.room === cleanRoom) {
+      socket.emit("room-joined", cleanRoom);
       return;
     }
 
-    if(socket.data.room){
+    // Leave the previous room if one exists
+    if (socket.data.room) {
       await socket.leave(socket.data.room);
     }
 
+    // Join the new room
     await socket.join(cleanRoom);
 
-    socket.emit("room-joined",cleanRoom);
+    socket.data.room = cleanRoom;
 
-    console.log(`${socket.data.username} joined room ${cleanRoom}`);
+    socket.emit("room-joined", cleanRoom);
 
+    console.log(`${socket.data.username} joined room: ${cleanRoom}`);
   });
 
-  socket.on("leave-room",async()=>{
+  // Leave the current room
+  socket.on("leave-room", async () => {
     const currentRoom = socket.data.room;
 
-    if(!currentRoom){
-      socket.emit("chat-error","you are not in any room");
+    if (!currentRoom) {
+      socket.emit("chat-error", "You are not in any room.");
       return;
     }
 
-    await socket.leave(!currentRoom)
+    await socket.leave(currentRoom);
 
     delete socket.data.room;
 
-    socket.emit("room-left",currentRoom);
+    socket.emit("room-left", currentRoom);
 
-    console.log(`${socket.data.username} left room ${currentRoom}`);
-
+    console.log(`${socket.data.username} left room: ${currentRoom}`);
   });
 
-  socket.on("send-message",(data)=>{
+  // Send a message to the current room only
+  socket.on("send-message", (data) => {
     const username = socket.data.username;
     const room = socket.data.room;
 
-    if(!username){
-      socket.emit("chat-error","join the chat first")
+    if (!username) {
+      socket.emit("chat-error", "Join the chat first.");
       return;
     }
 
-    if(!room || !socket.room.has(room)){
-      socket.emit("chat-error","join a room before sending a message");
+    if (!room || !socket.rooms.has(room)) {
+      socket.emit("chat-error", "Join a room before sending messages.");
       return;
     }
 
-    if(!data || typeof data.message !== "string"){
-      socket.emit("chat-error","invalid message");
+    if (
+      !data ||
+      typeof data.message !== "string"
+    ) {
+      socket.emit("chat-error", "Invalid message.");
       return;
     }
 
     const cleanMessage = data.message.trim();
 
-    if(!cleanMessage || cleanMessage.length > 500){
-      socket.emit("chat-error","message must be between 1 and 500 characters");
+    if (!cleanMessage || cleanMessage.length > 500) {
+      socket.emit(
+        "chat-error",
+        "Message must be between 1 and 500 characters."
+      );
       return;
     }
+
     const chatMessage = {
       id: crypto.randomUUID(),
       username,
-      senderId:socket.id,
+      senderId: socket.id,
       room,
-      message:cleanMessage,
-      timestamp: new Date().toISOString()
+      message: cleanMessage,
+      timestamp: new Date().toISOString(),
     };
-    io.to(room).emit("receive-message",chatMessage);
+
+    // Send only to members of this room
+    io.to(room).emit("receive-message", chatMessage);
   });
 
-  socket.on("disconnect",(reason)=>{
-    console.log("client disconnect",socket.id);
-    console.log("Reason",reason);
+  socket.on("disconnect", (reason) => {
+    console.log("Client disconnected:", socket.id);
+    console.log("Reason:", reason);
   });
-
 });
 
-httpServer.listen(PORT,()=>{
-  console.log(`Server is running on port ${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
